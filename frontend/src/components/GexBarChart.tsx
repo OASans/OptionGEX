@@ -1,5 +1,6 @@
 import {
   BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -7,94 +8,13 @@ import {
   ReferenceLine,
   ResponsiveContainer,
   Label,
-  Customized,
-  Bar,
+  Cell,
 } from "recharts";
 import type { GEXResult } from "../types/gex";
 import { formatGex } from "../utils";
 
 interface Props {
   data: GEXResult;
-}
-
-interface StrikeData {
-  strike: number;
-  call_gex: number;
-  put_gex: number;
-  net_gex: number;
-}
-
-function CustomBars(props: any) {
-  const { formattedGraphicalItems } = props;
-  const barSeries = formattedGraphicalItems?.[0];
-  if (!barSeries?.props?.data) return null;
-
-  const items = barSeries.props.data as Array<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    value: number;
-    payload: StrikeData;
-    background: { x: number; y: number; width: number; height: number };
-  }>;
-
-  // Derive zeroY and scale from any bar with non-zero net_gex
-  let zeroY: number | null = null;
-  let pxPerUnit: number | null = null;
-
-  for (const item of items) {
-    const val = item.value; // net_gex
-    if (val > 0 && item.height > 0) {
-      zeroY = item.y + item.height;
-      pxPerUnit = item.height / val;
-      break;
-    }
-    if (val < 0 && item.height > 0) {
-      zeroY = item.y;
-      pxPerUnit = item.height / Math.abs(val);
-      break;
-    }
-  }
-
-  if (zeroY === null || pxPerUnit === null) return null;
-
-  return (
-    <g>
-      {items.map((item, i) => {
-        const { x, width, payload } = item;
-        const callH = Math.max(payload.call_gex * pxPerUnit!, 0);
-        const putH = Math.max(Math.abs(payload.put_gex) * pxPerUnit!, 0);
-
-        return (
-          <g key={i}>
-            {callH > 0.5 && (
-              <rect
-                x={x}
-                y={zeroY! - callH}
-                width={width}
-                height={callH}
-                fill="#2d8a56"
-                rx={2}
-                ry={2}
-              />
-            )}
-            {putH > 0.5 && (
-              <rect
-                x={x}
-                y={zeroY!}
-                width={width}
-                height={putH}
-                fill="#c23b3b"
-                rx={2}
-                ry={2}
-              />
-            )}
-          </g>
-        );
-      })}
-    </g>
-  );
 }
 
 export function GexBarChart({ data }: Props) {
@@ -107,15 +27,8 @@ export function GexBarChart({ data }: Props) {
   // Compute y-axis domain to cover both call (positive) and put (negative) extremes
   const maxCall = Math.max(...filtered.map((s) => s.call_gex), 0);
   const minPut = Math.min(...filtered.map((s) => s.put_gex), 0);
-  const yMax = maxCall * 1.1;
-  const yMin = minPut * 1.1;
-
-  // Add _yRange field so the invisible bar drives the axis to cover full range
-  const chartData = filtered.map((s) => ({
-    ...s,
-    _yPos: maxCall,   // drives y-axis upper bound
-    _yNeg: minPut,    // drives y-axis lower bound
-  }));
+  const yMax = maxCall * 1.15 || 1;
+  const yMin = minPut * 1.15 || -1;
 
   return (
     <div className="chart-container">
@@ -142,7 +55,11 @@ export function GexBarChart({ data }: Props) {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={420}>
-        <BarChart data={chartData} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
+        <BarChart
+          data={filtered}
+          stackOffset="sign"
+          margin={{ top: 52, right: 24, left: 16, bottom: 8 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#e8e5e0" vertical={false} />
           <XAxis
             dataKey="strike"
@@ -232,9 +149,9 @@ export function GexBarChart({ data }: Props) {
               />
             </ReferenceLine>
           )}
-          {/* Invisible bar to drive axis scaling and provide positions to CustomBars */}
-          <Bar dataKey="net_gex" fill="transparent" isAnimationActive={false} />
-          <Customized component={CustomBars} />
+          {/* put_gex first (behind), call_gex second (in front) */}
+          <Bar dataKey="put_gex" name="Put GEX" stackId="gex" fill="#c23b3b" isAnimationActive={false} />
+          <Bar dataKey="call_gex" name="Call GEX" stackId="gex" fill="#2d8a56" isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
       <div className="chart-guide">
