@@ -23,14 +23,6 @@ export function GexBarChart({ data }: Props) {
     (s) => s.strike >= lower && s.strike <= upper
   );
 
-  // Preprocess: ensure call_gex >= 0 and put_gex <= 0 for clean rendering
-  const chartData = filtered.map((s) => ({
-    strike: s.strike,
-    call_gex: Math.max(s.call_gex, 0),
-    put_gex: Math.min(s.put_gex, 0),
-    net_gex: s.net_gex,
-  }));
-
   return (
     <div className="chart-container">
       <div className="chart-legend">
@@ -56,7 +48,11 @@ export function GexBarChart({ data }: Props) {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={420}>
-        <BarChart data={chartData} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
+        <BarChart
+          data={filtered}
+          stackOffset="sign"
+          margin={{ top: 52, right: 24, left: 16, bottom: 8 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#e8e5e0" vertical={false} />
           <XAxis
             dataKey="strike"
@@ -96,7 +92,7 @@ export function GexBarChart({ data }: Props) {
             }}
             cursor={{ fill: "rgba(0,0,0,0.03)" }}
           />
-          <ReferenceLine y={0} stroke="#e8e5e0" />
+          <ReferenceLine y={0} stroke="#ccc" />
           <ReferenceLine
             x={findClosestStrike(filtered.map((s) => s.strike), data.spot_price)}
             stroke="#1a1a1a"
@@ -145,36 +141,8 @@ export function GexBarChart({ data }: Props) {
               />
             </ReferenceLine>
           )}
-          <Bar
-            dataKey="call_gex"
-            name="Call GEX"
-            fill="#2d8a56"
-            radius={[3, 3, 0, 0]}
-            isAnimationActive={false}
-          />
-          <Bar
-            dataKey="put_gex"
-            name="Put GEX"
-            fill="#c23b3b"
-            radius={[0, 0, 3, 3]}
-            isAnimationActive={false}
-            // Render put bar at same x position by using custom shape
-            shape={(props: any) => {
-              const { x, y, width, height, fill } = props;
-              // Shift bar left by its width to overlap with the call bar
-              return (
-                <rect
-                  x={x - width}
-                  y={y}
-                  width={width}
-                  height={height}
-                  fill={fill}
-                  rx={3}
-                  ry={3}
-                />
-              );
-            }}
-          />
+          <Bar dataKey="call_gex" name="Call GEX" stackId="gex" fill="#2d8a56" />
+          <Bar dataKey="put_gex" name="Put GEX" stackId="gex" fill="#c23b3b" />
         </BarChart>
       </ResponsiveContainer>
       <div className="chart-guide">
