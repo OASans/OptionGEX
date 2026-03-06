@@ -7,7 +7,6 @@ import {
   Tooltip,
   ReferenceLine,
   ResponsiveContainer,
-  Cell,
   Label,
 } from "recharts";
 import type { GEXResult } from "../types/gex";
@@ -24,16 +23,24 @@ export function GexBarChart({ data }: Props) {
     (s) => s.strike >= lower && s.strike <= upper
   );
 
+  // Preprocess: ensure call_gex >= 0 and put_gex <= 0 for clean rendering
+  const chartData = filtered.map((s) => ({
+    strike: s.strike,
+    call_gex: Math.max(s.call_gex, 0),
+    put_gex: Math.min(s.put_gex, 0),
+    net_gex: s.net_gex,
+  }));
+
   return (
     <div className="chart-container">
       <div className="chart-legend">
         <div className="legend-item">
           <span className="legend-bar legend-call" />
-          <span>Positive Net GEX (stabilizing)</span>
+          <span>Call GEX (stabilizing)</span>
         </div>
         <div className="legend-item">
           <span className="legend-bar legend-put" />
-          <span>Negative Net GEX (destabilizing)</span>
+          <span>Put GEX (destabilizing)</span>
         </div>
         <div className="legend-item">
           <span className="legend-line legend-spot" />
@@ -49,7 +56,7 @@ export function GexBarChart({ data }: Props) {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={420}>
-        <BarChart data={filtered} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
+        <BarChart data={chartData} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e8e5e0" vertical={false} />
           <XAxis
             dataKey="strike"
@@ -89,6 +96,7 @@ export function GexBarChart({ data }: Props) {
             }}
             cursor={{ fill: "rgba(0,0,0,0.03)" }}
           />
+          <ReferenceLine y={0} stroke="#e8e5e0" />
           <ReferenceLine
             x={findClosestStrike(filtered.map((s) => s.strike), data.spot_price)}
             stroke="#1a1a1a"
@@ -137,16 +145,41 @@ export function GexBarChart({ data }: Props) {
               />
             </ReferenceLine>
           )}
-          <Bar dataKey="net_gex" name="Net GEX" radius={[3, 3, 3, 3]}>
-            {filtered.map((s, i) => (
-              <Cell key={i} fill={s.net_gex >= 0 ? "#2d8a56" : "#c23b3b"} />
-            ))}
-          </Bar>
+          <Bar
+            dataKey="call_gex"
+            name="Call GEX"
+            fill="#2d8a56"
+            radius={[3, 3, 0, 0]}
+            isAnimationActive={false}
+          />
+          <Bar
+            dataKey="put_gex"
+            name="Put GEX"
+            fill="#c23b3b"
+            radius={[0, 0, 3, 3]}
+            isAnimationActive={false}
+            // Render put bar at same x position by using custom shape
+            shape={(props: any) => {
+              const { x, y, width, height, fill } = props;
+              // Shift bar left by its width to overlap with the call bar
+              return (
+                <rect
+                  x={x - width}
+                  y={y}
+                  width={width}
+                  height={height}
+                  fill={fill}
+                  rx={3}
+                  ry={3}
+                />
+              );
+            }}
+          />
         </BarChart>
       </ResponsiveContainer>
       <div className="chart-guide">
         <p><strong>X-axis:</strong> Strike prices (+/- 10% from spot). <strong>Y-axis:</strong> GEX in dollars -- hedging pressure market makers exert at each strike.</p>
-        <p>Tall green bars = strong support (MM sell rallies, buy dips). Tall red bars = acceleration zone (MM sell dips, buy rallies).</p>
+        <p>Green bars (up) = call gamma, stabilizing. Red bars (down) = put gamma, destabilizing. Hover for breakdown.</p>
       </div>
     </div>
   );
