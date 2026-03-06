@@ -36,20 +36,27 @@ def _fetch_ticker_data(symbol: str, max_expirations: int):
     info = tk.fast_info
     spot = float(info.last_price)
 
-    # Get expirations
+    # Get expirations — skip ones with no OI (Yahoo clears OI after hours for dailies)
     all_expirations = list(tk.options)
-    expirations = all_expirations[:max_expirations]
-
-    # Get chains
     now = datetime.now()
     contracts = []
-    for exp_str in expirations:
+    expirations = []
+
+    for exp_str in all_expirations:
+        if len(expirations) >= max_expirations:
+            break
         try:
             chain = tk.option_chain(exp_str)
         except Exception as e:
             logger.error(f"Failed to get chain for {symbol} {exp_str}: {e}")
             continue
 
+        # Skip expirations with no open interest (Yahoo clears OI after hours)
+        total_oi = int((chain.calls["openInterest"].fillna(0)).sum() + (chain.puts["openInterest"].fillna(0)).sum())
+        if total_oi == 0:
+            continue
+
+        expirations.append(exp_str)
         exp_date = datetime.strptime(exp_str, "%Y-%m-%d")
         tte = max((exp_date - now).days / 365.0, 1 / 365.0)
 
