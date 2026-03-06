@@ -10,6 +10,8 @@ class StrikeGEXSchema(BaseModel):
     call_gex: float
     put_gex: float
     net_gex: float
+    call_oi: int
+    put_oi: int
 
 
 class GEXResultSchema(BaseModel):

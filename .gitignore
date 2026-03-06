@@ -20,3 +20,4 @@ dist/
 
 # Data
 tickers.json
+frontend/tsconfig.tsbuildinfo

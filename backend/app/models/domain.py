@@ -19,6 +19,8 @@ class StrikeGEX:
     call_gex: float
     put_gex: float
     net_gex: float
+    call_oi: int = 0
+    put_oi: int = 0
 
 
 @dataclass

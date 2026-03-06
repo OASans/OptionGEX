@@ -13,13 +13,17 @@ def compute_gex(
 ) -> GEXResult:
     call_by_strike: dict[float, float] = defaultdict(float)
     put_by_strike: dict[float, float] = defaultdict(float)
+    call_oi_by_strike: dict[float, int] = defaultdict(int)
+    put_oi_by_strike: dict[float, int] = defaultdict(int)
 
     for c in contracts:
         gex = c.gamma * c.open_interest * 100 * spot_price * spot_price * 0.01
         if c.option_type == "call":
             call_by_strike[c.strike] += gex
+            call_oi_by_strike[c.strike] += c.open_interest
         else:
             put_by_strike[c.strike] -= gex  # puts contribute negative
+            put_oi_by_strike[c.strike] += c.open_interest
 
     all_strikes = sorted(set(call_by_strike.keys()) | set(put_by_strike.keys()))
 
@@ -27,7 +31,7 @@ def compute_gex(
     for s in all_strikes:
         cg = call_by_strike.get(s, 0.0)
         pg = put_by_strike.get(s, 0.0)
-        strikes.append(StrikeGEX(strike=s, call_gex=cg, put_gex=pg, net_gex=cg + pg))
+        strikes.append(StrikeGEX(strike=s, call_gex=cg, put_gex=pg, net_gex=cg + pg, call_oi=call_oi_by_strike.get(s, 0), put_oi=put_oi_by_strike.get(s, 0)))
 
     total_call_gex = sum(s.call_gex for s in strikes)
     total_put_gex = sum(s.put_gex for s in strikes)

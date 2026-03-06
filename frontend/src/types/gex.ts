@@ -3,6 +3,8 @@ export interface StrikeGEX {
   call_gex: number;
   put_gex: number;
   net_gex: number;
+  call_oi: number;
+  put_oi: number;
 }
 
 export interface GEXResult {

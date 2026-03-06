@@ -3,6 +3,8 @@ import { useGexData } from "../hooks/useGexData";
 import { useTickers } from "../hooks/useTickers";
 import { TickerSelector } from "./TickerSelector";
 import { GexBarChart } from "./GexBarChart";
+import { AggregateGexChart } from "./AggregateGexChart";
+import { OIChart } from "./OIChart";
 import { GexSummaryCard } from "./GexSummaryCard";
 import { RefreshControl } from "./RefreshControl";
 import { OptionsGuide } from "./OptionsGuide";
@@ -77,6 +79,12 @@ export function Dashboard() {
               {error && <div className="warning-banner">Refresh error: {error}</div>}
               <GexSummaryCard data={data} />
               <GexBarChart data={data} />
+              <div style={{ marginTop: 24 }}>
+                <AggregateGexChart data={data} />
+              </div>
+              <div style={{ marginTop: 24 }}>
+                <OIChart data={data} />
+              </div>
             </div>
           )}
 

@@ -53,6 +53,8 @@ async def get_gex(ticker: str, request: Request):
                 "call_gex": s.call_gex,
                 "put_gex": s.put_gex,
                 "net_gex": s.net_gex,
+                "call_oi": s.call_oi,
+                "put_oi": s.put_oi,
             }
             for s in result.strikes
         ],
