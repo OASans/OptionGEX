@@ -49,7 +49,7 @@ export function GexBarChart({ data }: Props) {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={420}>
-        <BarChart data={filtered} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
+        <BarChart data={filtered} barSize={8} barGap={-8} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e8e5e0" vertical={false} />
           <XAxis
             dataKey="strike"
