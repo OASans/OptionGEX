@@ -124,12 +124,12 @@ export function GexBarChart({ data }: Props) {
               />
             </ReferenceLine>
           )}
-          <Bar dataKey="call_gex" name="Call GEX" stackId="gex" radius={[3, 3, 0, 0]}>
+          <Bar dataKey="call_gex" name="Call GEX" radius={[3, 3, 0, 0]}>
             {filtered.map((_, i) => (
               <Cell key={i} fill="#2d8a56" />
             ))}
           </Bar>
-          <Bar dataKey="put_gex" name="Put GEX" stackId="gex" radius={[0, 0, 3, 3]}>
+          <Bar dataKey="put_gex" name="Put GEX" radius={[0, 0, 3, 3]}>
             {filtered.map((_, i) => (
               <Cell key={i} fill="#c23b3b" />
             ))}
