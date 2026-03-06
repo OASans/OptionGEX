@@ -26,18 +26,22 @@ export function AggregateGexChart({ data }: Props) {
     (s) => s.strike >= lower && s.strike <= upper
   );
 
-  // Compute cumulative/aggregate GEX (sum net_gex from left to right)
+  // Compute aggregate GEX: sum net_gex from right to left
+  // At each strike, aggregate = sum of net_gex for all strikes >= current
+  // This starts negative on the left (put dominated) and rises to positive on the right
+  const aggValues: number[] = new Array(filtered.length).fill(0);
   let cumulative = 0;
-  const chartData = filtered.map((s) => {
-    cumulative += s.net_gex;
-    return {
-      strike: s.strike,
-      net_gex: s.net_gex,
-      aggregate_gex: cumulative,
-      call_gex: s.call_gex,
-      put_gex: s.put_gex,
-    };
-  });
+  for (let i = filtered.length - 1; i >= 0; i--) {
+    cumulative += filtered[i].net_gex;
+    aggValues[i] = cumulative;
+  }
+  const chartData = filtered.map((s, i) => ({
+    strike: s.strike,
+    net_gex: s.net_gex,
+    aggregate_gex: aggValues[i],
+    call_gex: s.call_gex,
+    put_gex: s.put_gex,
+  }));
 
   const flipStrike = data.flip_point;
   const minStrike = filtered.length > 0 ? filtered[0].strike : 0;
