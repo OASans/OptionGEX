@@ -1,0 +1,5 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic-settings==2.7.1
+yfinance>=0.2.36
+eval-type-backport==0.3.1
