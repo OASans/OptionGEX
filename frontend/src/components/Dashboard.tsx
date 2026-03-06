@@ -77,6 +77,16 @@ export function Dashboard() {
                 <div className="warning-banner">Data is stale - waiting for refresh</div>
               )}
               {error && <div className="warning-banner">Refresh error: {error}</div>}
+              {data.strikes.length < 20 && data.strikes.length > 0 && (
+                <div className="warning-banner">
+                  Limited data — market may be closed. Yahoo Finance returns sparse open interest data after hours. Charts will be more accurate during market hours (9:30 AM – 4:00 PM ET).
+                </div>
+              )}
+              {data.total_gex === 0 && data.strikes.length === 0 && (
+                <div className="warning-banner">
+                  No options data available. The market is likely closed and Yahoo Finance has cleared open interest data. Try again during market hours.
+                </div>
+              )}
               <GexSummaryCard data={data} />
               <GexBarChart data={data} />
               <div style={{ marginTop: 24 }}>
