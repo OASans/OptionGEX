@@ -29,11 +29,11 @@ export function GexBarChart({ data }: Props) {
       <div className="chart-legend">
         <div className="legend-item">
           <span className="legend-bar legend-call" />
-          <span>Call GEX (stabilizing)</span>
+          <span>Positive Net GEX (stabilizing)</span>
         </div>
         <div className="legend-item">
           <span className="legend-bar legend-put" />
-          <span>Put GEX (destabilizing)</span>
+          <span>Negative Net GEX (destabilizing)</span>
         </div>
         <div className="legend-item">
           <span className="legend-line legend-spot" />
@@ -49,7 +49,7 @@ export function GexBarChart({ data }: Props) {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={420}>
-        <BarChart data={filtered} barSize={8} barGap={-8} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
+        <BarChart data={filtered} margin={{ top: 52, right: 24, left: 16, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e8e5e0" vertical={false} />
           <XAxis
             dataKey="strike"
@@ -65,14 +65,27 @@ export function GexBarChart({ data }: Props) {
             tickLine={false}
           />
           <Tooltip
-            formatter={(value: number, name: string) => [formatGex(value), name]}
-            labelFormatter={(label) => `Strike: $${Number(label).toFixed(1)}`}
-            contentStyle={{
-              backgroundColor: "#fff",
-              border: "1px solid #e8e5e0",
-              borderRadius: "8px",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-              fontSize: "13px",
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const d = payload[0]?.payload;
+              if (!d) return null;
+              return (
+                <div style={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #e8e5e0",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                  fontSize: "13px",
+                  padding: "10px 14px",
+                }}>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>Strike: ${Number(label).toFixed(1)}</div>
+                  <div style={{ color: "#2d8a56" }}>Call GEX: {formatGex(d.call_gex)}</div>
+                  <div style={{ color: "#c23b3b" }}>Put GEX: {formatGex(d.put_gex)}</div>
+                  <div style={{ borderTop: "1px solid #e8e5e0", marginTop: 4, paddingTop: 4, fontWeight: 500 }}>
+                    Net: {formatGex(d.net_gex)}
+                  </div>
+                </div>
+              );
             }}
             cursor={{ fill: "rgba(0,0,0,0.03)" }}
           />
@@ -124,14 +137,9 @@ export function GexBarChart({ data }: Props) {
               />
             </ReferenceLine>
           )}
-          <Bar dataKey="call_gex" name="Call GEX" radius={[3, 3, 0, 0]}>
-            {filtered.map((_, i) => (
-              <Cell key={i} fill="#2d8a56" />
-            ))}
-          </Bar>
-          <Bar dataKey="put_gex" name="Put GEX" radius={[0, 0, 3, 3]}>
-            {filtered.map((_, i) => (
-              <Cell key={i} fill="#c23b3b" />
+          <Bar dataKey="net_gex" name="Net GEX" radius={[3, 3, 3, 3]}>
+            {filtered.map((s, i) => (
+              <Cell key={i} fill={s.net_gex >= 0 ? "#2d8a56" : "#c23b3b"} />
             ))}
           </Bar>
         </BarChart>
