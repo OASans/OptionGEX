@@ -53,6 +53,7 @@ class GEXScheduler:
         try:
             spot_price, expirations, contracts = await self._client.fetch_all(ticker)
 
+            self._cache.set_raw(ticker, spot_price, expirations, contracts)
             result = compute_gex(ticker, spot_price, contracts, expirations)
             self._cache.set(ticker, result)
             logger.info(

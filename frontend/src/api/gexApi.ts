@@ -14,8 +14,12 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
-export async function fetchGex(ticker: string): Promise<GEXResult> {
-  return fetchJson<GEXResult>(`${BASE}/gex/${ticker}`);
+export async function fetchGex(ticker: string, expirations?: string[]): Promise<GEXResult> {
+  let url = `${BASE}/gex/${ticker}`;
+  if (expirations && expirations.length > 0) {
+    url += `?expirations=${expirations.join(",")}`;
+  }
+  return fetchJson<GEXResult>(url);
 }
 
 export async function fetchTickers(): Promise<string[]> {

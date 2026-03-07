@@ -25,6 +25,7 @@ class GEXResultSchema(BaseModel):
     max_gamma_strike: float | None
     max_pain: float | None
     expirations_used: list[str]
+    available_expirations: list[str]
     computed_at: datetime
     is_stale: bool
 

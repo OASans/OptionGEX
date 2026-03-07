@@ -18,6 +18,7 @@ export interface GEXResult {
   max_gamma_strike: number | null;
   max_pain: number | null;
   expirations_used: string[];
+  available_expirations: string[];
   computed_at: string;
   is_stale: boolean;
 }

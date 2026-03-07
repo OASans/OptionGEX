@@ -35,5 +35,6 @@ class GEXResult:
     max_gamma_strike: float | None = None
     max_pain: float | None = None
     expirations_used: list[str] = field(default_factory=list)
+    available_expirations: list[str] = field(default_factory=list)
     computed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     is_stale: bool = False

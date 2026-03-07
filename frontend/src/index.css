@@ -351,6 +351,55 @@ button:disabled {
   color: var(--warning);
 }
 
+/* Expiration Selector */
+.expiration-selector {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.expiration-selector label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding-top: 7px;
+  white-space: nowrap;
+}
+
+.expiration-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.exp-chip {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.exp-chip:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-tertiary);
+  box-shadow: none;
+}
+
+.exp-chip.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* Chart */
 .chart-container {
   background: var(--bg-secondary);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGexData } from "../hooks/useGexData";
 import { useTickers } from "../hooks/useTickers";
 import { TickerSelector } from "./TickerSelector";
@@ -17,8 +17,16 @@ export function Dashboard() {
   const [pollInterval, setPollInterval] = useState(30000);
   const [tab, setTab] = useState<Tab>("dashboard");
 
+  const [selectedExpirations, setSelectedExpirations] = useState<string[]>([]);
+
   const selected = activeTicker || tickers[0] || "";
-  const { data, loading, error, lastFetch, refetch } = useGexData(selected, pollInterval);
+
+  // Reset expiration selection when ticker changes
+  useEffect(() => {
+    setSelectedExpirations([]);
+  }, [selected]);
+  const expsToSend = selectedExpirations.length > 0 ? selectedExpirations : undefined;
+  const { data, loading, error, lastFetch, refetch } = useGexData(selected, pollInterval, expsToSend);
 
   return (
     <div className="dashboard">
@@ -88,6 +96,39 @@ export function Dashboard() {
                 </div>
               )}
               <GexSummaryCard data={data} />
+
+              {data.available_expirations.length > 0 && (
+                <div className="expiration-selector">
+                  <label>Expirations:</label>
+                  <div className="expiration-chips">
+                    <button
+                      className={`exp-chip ${selectedExpirations.length === 0 ? "active" : ""}`}
+                      onClick={() => setSelectedExpirations([])}
+                    >
+                      All
+                    </button>
+                    {data.available_expirations.map((exp) => {
+                      const isSelected = selectedExpirations.includes(exp);
+                      return (
+                        <button
+                          key={exp}
+                          className={`exp-chip ${isSelected ? "active" : ""}`}
+                          onClick={() => {
+                            setSelectedExpirations((prev) =>
+                              isSelected
+                                ? prev.filter((e) => e !== exp)
+                                : [...prev, exp]
+                            );
+                          }}
+                        >
+                          {exp}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <GexBarChart data={data} />
               <div style={{ marginTop: 24 }}>
                 <AggregateGexChart data={data} />
