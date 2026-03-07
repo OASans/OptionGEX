@@ -8,6 +8,14 @@ Real-time stock option Gamma Exposure (GEX) analysis dashboard. GEX measures how
 ![React](https://img.shields.io/badge/React-Recharts-61DAFB?logo=react)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
+## Screenshots
+
+![Dashboard](docs/dashboard.png)
+*GEX bar chart with expiration filter, key metrics, and reference lines*
+
+![Learn Options](docs/learn-options.png)
+*Built-in options knowledge base*
+
 ## Features
 
 - **GEX Bar Chart** — Per-strike gamma exposure with call (green) and put (red) breakdown
