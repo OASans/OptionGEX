@@ -11,10 +11,14 @@ Real-time stock option Gamma Exposure (GEX) analysis dashboard. GEX measures how
 ## Features
 
 - **GEX Bar Chart** — Per-strike gamma exposure with call (green) and put (red) breakdown
+- **Aggregate GEX Chart** — Net GEX bars with cumulative aggregate line and positive/negative gamma zones
+- **Open Interest Chart** — Call and put open interest by strike
+- **Expiration Filter** — Multi-select expiration dates to analyze specific timeframes
 - **Key Levels** — Spot price, gamma flip point, max pain, and max gamma strike
 - **Auto-Refresh** — Configurable polling interval (15s / 30s / 60s)
 - **Multi-Ticker** — Track up to 10 tickers simultaneously (SPY, AAPL, NVDA, etc.)
 - **Metric Tooltips** — Hover any metric card for a plain-English explanation
+- **After-Hours Detection** — Warns when market data is sparse or unavailable
 - **Learn Options** — Built-in knowledge base covering Greeks, IV, GEX mechanics, and common strategies
 - **Free Data** — Uses Yahoo Finance via yfinance (no API key needed)
 
@@ -25,6 +29,7 @@ Real-time stock option Gamma Exposure (GEX) analysis dashboard. GEX measures how
 | Backend | Python, FastAPI, yfinance, Black-Scholes gamma calc |
 | Frontend | React, TypeScript, Recharts, Vite |
 | Deployment | Render (backend), GitHub Pages (frontend) |
+| Analytics | GoatCounter |
 
 ## Local Development
 
@@ -54,7 +59,7 @@ Frontend runs on http://localhost:5173 (proxies `/api` to backend)
 
 ### GEX Calculation
 
-For each option contract across the nearest 4 expirations:
+For each option contract across up to 12 expirations:
 
 ```
 GEX = gamma × open_interest × 100 × spot² × 0.01
@@ -68,6 +73,14 @@ Since yfinance doesn't provide gamma directly, it's calculated from implied vola
 ```
 gamma = φ(d1) / (S × σ × √T)
 ```
+
+### Charts
+
+| Chart | Description |
+|-------|-------------|
+| **GEX by Strike** | Call GEX (green, up) and put GEX (red, down) per strike price |
+| **Aggregate GEX** | Net GEX bars + right-to-left cumulative line showing overall gamma profile |
+| **Open Interest** | Call OI (up) and put OI (down) per strike |
 
 ### Key Metrics
 
@@ -88,7 +101,7 @@ See [GLOSSARY.md](GLOSSARY.md) for detailed explanations of all metrics.
 2. Connect the GitHub repo, set root directory to `backend`
 3. Build command: `pip install -r requirements.txt`
 4. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-5. Note the deployed URL (e.g., `https://optiongex-api.onrender.com`)
+5. Note the deployed URL (e.g., `https://optiongex.onrender.com`)
 
 ### Frontend (GitHub Pages)
 
@@ -107,4 +120,4 @@ python -m pytest tests/
 
 ## Rate Limits
 
-Each ticker uses ~6 Yahoo Finance calls per refresh (1 quote + 1 expirations + up to 4 chains). The backend limits concurrent tickers to 10.
+Each ticker uses ~6 Yahoo Finance calls per refresh (1 quote + 1 expirations + up to 12 chains). The backend limits concurrent tickers to 10.
