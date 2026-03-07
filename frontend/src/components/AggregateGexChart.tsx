@@ -43,7 +43,10 @@ export function AggregateGexChart({ data }: Props) {
     put_gex: s.put_gex,
   }));
 
-  const flipStrike = data.flip_point;
+  const strikes = filtered.map((s) => s.strike);
+  const flipStrike = data.flip_point
+    ? findClosestStrike(strikes, data.flip_point)
+    : undefined;
   const minStrike = filtered.length > 0 ? filtered[0].strike : 0;
   const maxStrike = filtered.length > 0 ? filtered[filtered.length - 1].strike : 0;
 
@@ -71,7 +74,7 @@ export function AggregateGexChart({ data }: Props) {
         <ComposedChart data={chartData} margin={{ top: 52, right: 60, left: 16, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e8e5e0" vertical={false} />
           {/* Background shading: negative gamma zone (left of flip) and positive (right of flip) */}
-          {flipStrike && (
+          {flipStrike != null && (
             <ReferenceArea
               x1={minStrike}
               x2={flipStrike}
@@ -79,7 +82,7 @@ export function AggregateGexChart({ data }: Props) {
               fillOpacity={1}
             />
           )}
-          {flipStrike && (
+          {flipStrike != null && (
             <ReferenceArea
               x1={flipStrike}
               x2={maxStrike}
